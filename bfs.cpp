@@ -6,71 +6,70 @@
 
 using namespace std;
 
-class Graph {
+template <class T> class Graph {
  public:
-  add_edge(const string& first, const string& second) {
+  add_edge(const T& first, const T& second) {
     adjacent_[first].insert(second);
     adjacent_[second].insert(first);
   }
 
-  bool find_shortest_path(const string& source_key,
-                          const string& target_key,
-                          deque<string>* path) const {
-    if (adjacent_.count(source_key) == 0 || adjacent_.count(target_key) == 0) {
+  bool find_shortest_path(const T& source,
+                          const T& target,
+                          deque<T>* path) const {
+    if (adjacent_.count(source) == 0 || adjacent_.count(target) == 0) {
       return false;
     }
 
-    unordered_set<string> visited;
-    deque<string> queue;
-    unordered_map<string, string> backtrace;
-    queue.push_back(source_key);
+    unordered_set<T> visited;
+    deque<T> queue;
+    unordered_map<T, T> backtrace;
+    queue.push_back(source);
     bool found = false;
 
     while (!queue.empty()) {
-      const string current_key = queue.front();
-      if (current_key == target_key) {
+      const T current = queue.front();
+      if (current == target) {
         found = true;
         break;
       }
       queue.pop_front();
-      visited.insert(current_key);
-      for (const string& adjacent_key : adjacent_.find(current_key)->second) {
-        if (!visited.count(adjacent_key)) {
-          backtrace[adjacent_key] = current_key;
-          queue.push_back(adjacent_key);
+      visited.insert(current);
+      for (const T& adjacent : adjacent_.find(current)->second) {
+        if (!visited.count(adjacent)) {
+          backtrace[adjacent] = current;
+          queue.push_back(adjacent);
         }
       }
     }
 
     if (found && path != nullptr) {
-      for (string key = target_key; key != source_key; key = backtrace[key]) {
-        path->push_front(key);
+      for (T node = target; node != source; node = backtrace[node]) {
+        path->push_front(node);
       }
-      path->push_front(source_key);
+      path->push_front(source);
     }
 
     return found;
   }
 
  private:
-  unordered_map<string, unordered_set<string>> adjacent_;
+  unordered_map<T, unordered_set<T>> adjacent_;
 };
 
-void test(const Graph& g, const string& source_key, const string& target_key) {
-  cout << "Searching for path; " << source_key << " to " << target_key << endl;
+void test(const Graph<string>& g, const string& source, const string& target) {
+  cout << "Searching for path: " << source << " to " << target << endl;
   deque<string> path;
-  bool found = g.find_shortest_path(source_key, target_key, &path);
+  bool found = g.find_shortest_path(source, target, &path);
 
   cout << "found: " << (found ? "yes" : "no") << endl;
-  for (const string& key : path) {
-    cout << " -> " << key;
+  for (const string& node : path) {
+    cout << " -> " << node;
   }
   cout << endl << endl;
 }
 
-
 int main() {
-  Graph g;
+  Graph<string> g;
   g.add_edge("a", "b");
   g.add_edge("a", "c");
   g.add_edge("b", "d");
